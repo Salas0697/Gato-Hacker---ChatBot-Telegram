@@ -1,8 +1,9 @@
 {
-  "name": "FRAME Director",
+  "name": "FRAME",
   "short_name": "FRAME",
   "description": "Personal social studio for photo carousels and visual layouts.",
-  "start_url": "./frame/index.html?v=10",
+  "id": "./",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -10,10 +11,10 @@
   "theme_color": "#070708",
   "icons": [
     {
-      "src": "./assets/apple-touch-icon.png?v=1",
+      "src": "./apple-touch-icon.png?v=2",
       "sizes": "180x180",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
