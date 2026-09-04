@@ -1,22 +1,18 @@
 (()=>{
-/* FRAME v22: product simplification. No render/build function is wrapped here. */
+/* FRAME v22.1: product simplification without render/build wrappers or mutation loops. */
 const $q=s=>document.querySelector(s), $$q=s=>[...document.querySelectorAll(s)];
 const css=document.createElement('style');css.textContent=`
-/* Keep the engine; remove the control-room feeling. */
 #controlBar,.dock,#randomStudio,#randomStudioBtn,#randomBtn,#safeBtn,#slideBtn,#variationBtn,#remixAllBtn,#moreLikeBtn,#storyBadge,.storyBadge,.coverageBadge{display:none!important}
 .quickbar{display:grid!important;grid-template-columns:1fr 1.35fr 1fr!important;gap:8px!important;padding:7px 16px 8px!important;overflow:visible!important}.quickbar>*{display:none!important}.quickbar #fastAdd,.quickbar #fastNewDesign,.quickbar #fastExport{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;width:auto!important;height:44px!important;padding:0 10px!important;border-radius:999px!important;font-size:11px!important;font-weight:800!important}.quickbar #fastNewDesign{background:#f3f3f5!important;color:#09090b!important;border-color:#f3f3f5!important}.studioTop{padding-bottom:5px!important}.studioTop h1{font-size:26px!important}.studioTop small{font-size:10px!important;color:#74747c!important}.frameGuide{text-align:center;color:#6f6f78;font-size:10px;padding:0 12px 7px}.frameCounter{text-align:center;font-size:11px;font-weight:750;color:#a7a7af;padding:0 0 5px}.editHint{bottom:calc(92px + env(safe-area-inset-bottom))!important}.editHint #uxMove{display:none!important}.editHint button{min-height:42px!important}.slide.frameKept:after{content:'✓';position:absolute;right:9px;top:9px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(8,8,10,.72);color:#fff;font-size:12px;font-weight:900;z-index:90;pointer-events:none;backdrop-filter:blur(10px)}
 .keepToast{position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:140;background:#f3f3f5;color:#09090b;border:0;border-radius:999px;padding:10px 14px;font-size:11px;font-weight:800;display:none}.keepToast.on{display:block}.filmstrip{margin-bottom:calc(10px + env(safe-area-inset-bottom))!important}
 `;document.head.appendChild(css);
-function label(){const a=$q('#fastAdd'),n=$q('#fastNewDesign'),x=$q('#fastExport');if(a)a.textContent='＋ Fotos';if(n)n.textContent='✦ Otra opción';if(x)x.textContent='↑ Exportar';const e=$q('#uxEdit');if(e)e.textContent=S?.selectedType==='img'?'Reencuadrar':S?.selectedType==='text'?'Editar texto':'Editar'}
+function setText(el,text){if(el&&el.textContent!==text)el.textContent=text}
+function label(){setText($q('#fastAdd'),'＋ Fotos');setText($q('#fastNewDesign'),'✦ Otra opción');setText($q('#fastExport'),'↑ Exportar');const e=$q('#uxEdit');if(e){const t=S.selectedType==='img'?'Reencuadrar':S.selectedType==='text'?'Editar texto':'Editar';setText(e,t)}}
 label();
 const qb=$q('.quickbar');if(qb&&!$q('.frameGuide')){const c=document.createElement('div');c.className='frameCounter';c.id='frameCounter';qb.before(c);const g=document.createElement('div');g.className='frameGuide';g.textContent='Toca una foto o un texto para cambiarlo.';qb.after(g)}
-function counter(){const c=$q('#frameCounter');if(c)c.textContent=S?.slides?.length?`${(S.currentSlide||0)+1} / ${S.slides.length}`:'';$$q('.slide').forEach((el,i)=>el.classList.toggle('frameKept',!!S?.slides?.[i]?.frameKept));label()}
-// Simple selection-aware counter without altering the render pipeline.
-document.addEventListener('click',()=>setTimeout(counter,0),true);document.addEventListener('touchend',()=>setTimeout(counter,0),{passive:true,capture:true});setInterval(counter,900);counter();
-// Long-press a slide/canvas to keep it while exploring another option.
+function counter(){const c=$q('#frameCounter');if(c)c.textContent=S.slides?.length?`${(S.currentSlide||0)+1} / ${S.slides.length}`:'';$$q('.slide').forEach((el,i)=>el.classList.toggle('frameKept',!!S.slides?.[i]?.frameKept));label()}
+document.addEventListener('click',()=>requestAnimationFrame(counter),true);document.addEventListener('touchend',()=>requestAnimationFrame(counter),{passive:true,capture:true});counter();
 const toast=document.createElement('button');toast.className='keepToast';toast.id='keepToast';toast.textContent='Conservar este diseño';document.body.appendChild(toast);let timer=null,targetSlide=null;
 function slideIndex(el){const s=el.closest?.('.slide');if(!s)return null;const ds=s.dataset.slide;return ds!=null&&ds!==''?+ds:S.currentSlide}
 document.addEventListener('touchstart',e=>{const s=e.target.closest?.('.slide');if(!s)return;targetSlide=slideIndex(s);clearTimeout(timer);timer=setTimeout(()=>{const sl=S.slides?.[targetSlide];if(!sl)return;sl.frameKept=!sl.frameKept;saveProject();counter();toast.textContent=sl.frameKept?'✓ Este slide se conserva':'Slide liberado';toast.classList.add('on');setTimeout(()=>toast.classList.remove('on'),1500)},650)},{passive:true,capture:true});document.addEventListener('touchmove',()=>clearTimeout(timer),{passive:true,capture:true});document.addEventListener('touchend',()=>clearTimeout(timer),{passive:true,capture:true});
-// Make the existing contextual actions use everyday language.
-const mo=new MutationObserver(()=>label());mo.observe(document.body,{subtree:true,childList:true});
 })();
